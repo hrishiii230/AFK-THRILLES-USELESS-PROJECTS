@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>The Definitely-Accurate History of Your Name</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  :root{
+    --bg:#12101a;
+    --card:#1e1b2b;
+    --accent:#ffb703;
+    --accent2:#fb5607;
+    --accent3:#8ecae6;
+    --text:#f4f1ff;
+    --muted:#a89fc9;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    min-height:100vh;
+    font-family:'Segoe UI',Tahoma,sans-serif;
+    background:radial-gradient(circle at top,#241f38,#0c0a13 75%);
+    color:var(--text);
+    overflow-x:hidden;
+  }
+
+  /* ---------- GATE SCREEN ---------- */
+  #gate{
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+    text-align:center;
+    position:relative;
+  }
+  #gate .floaters span{
+    position:absolute;
+    font-size:2em;
+    opacity:0.15;
+    animation:float 8s ease-in-out infinite;
+  }
+  @keyframes float{
+    0%,100%{transform:translateY(0) rotate(0deg);}
+    50%{transform:translateY(-30px) rotate(15deg);}
+  }
+  #gate h1{
+    font-size:1.8em;
+    max-width:520px;
+    margin-bottom:6px;
+    background:linear-gradient(90deg,var(--accent),var(--accent2));
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+  }
+  #gate p.rule{
+    color:var(--muted);
+    max-width:460px;
+    margin-bottom:26px;
+    line-height:1.5;
+  }
+  #gate p.rule b{color:var(--accent3);}
+  .name-input-wrap{
+    background:var(--card);
+    border:1px solid #35304a;
+    border-radius:18px;
+    padding:28px 26px;
+    width:100%;
+    max-width:380px;
+    box-shadow:0 20px 60px rgba(0,0,0,0.4);
+  }
+  #nameInput{
+    width:100%;
+    font-size:1.6em;
+    text-align:center;
+    padding:12px 10px;
+    border-radius:10px;
+    border:2px solid #3d3856;
+    background:#141020;
+    color:var(--text);
+    letter-spacing:0.05em;
+    outline:none;
+    transition:border-color 0.2s;
+  }
+  #nameInput:focus{border-color:var(--accent3);}
+  .live-preview{
+    margin-top:14px;
+    font-size:1.6em;
+    letter-spacing:0.08em;
+    min-height:1.4em;
+  }
+  .live-preview .ok{color:#8bd17c;}
+  .live-preview .bad{color:#f76f8e;}
+  .live-preview .neutral{color:var(--muted);}
+  #enterBtn{
+    margin-top:20px;
+    width:100%;
+    padding:14px;
+    border:none;
+    border-radius:10px;
+    background:linear-gradient(90deg,var(--accent),var(--accent2));
+    color:#1a1420;
+    font-weight:800;
+    font-size:1.05em;
+    cursor:pointer;
+    transition:transform 0.15s, opacity 0.2s;
+  }
+  #enterBtn:disabled{
+    opacity:0.35;
+    cursor:not-allowed;
+  }
+  #enterBtn:not(:disabled):hover{transform:translateY(-2px);}
+  .shake{animation:shake 0.4s;}
+  @keyframes shake{
+    0%,100%{transform:translateX(0);}
+    20%{transform:translateX(-10px);}
+    40%{transform:translateX(10px);}
+    60%{transform:translateX(-6px);}
+    80%{transform:translateX(6px);}
+  }
+  #hint{
+    margin-top:12px;
+    font-size:0.85em;
+    color:var(--muted);
+    min-height:1.2em;
+  }
+
+  /* ---------- MAIN PAGE ---------- */
+  #main{
+    display:none;
+    padding:40px 16px 100px;
+    max-width:920px;
+    margin:0 auto;
+  }
+  #main h1{
+    text-align:center;
+    font-size:2.1em;
+    margin-bottom:4px;
+    background:linear-gradient(90deg,var(--accent3),var(--accent));
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+  }
+  #main p.sub{
+    text-align:center;
+    color:var(--muted);
+    margin-bottom:36px;
+  }
+  .section{
+    background:var(--card);
+    border:1px solid #302b46;
+    border-radius:16px;
+    padding:24px;
+    margin-bottom:22px;
+  }
+  .section h2{
+    margin-top:0;
+    font-size:1.15em;
+    color:var(--accent3);
+  }
+  .era-tag{
+    display:inline-block;
+    background:#2b2540;
+    color:var(--accent);
+    font-size:0.75em;
+    font-weight:700;
+    padding:3px 10px;
+    border-radius:20px;
+    margin-bottom:10px;
+  }
+  .section p{
+    line-height:1.6;
+    color:#dcd8ee;
+  }
+  .fun-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+    gap:18px;
+  }
+  .emoji-name{
+    font-size:2em;
+    text-align:center;
+    padding:14px 0;
+  }
+  .anagram-list{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    justify-content:center;
+    margin-top:10px;
+  }
+  .anagram-list span{
+    background:#2b2540;
+    padding:6px 12px;
+    border-radius:8px;
+    font-family:monospace;
+    letter-spacing:0.05em;
+  }
+  button.mini{
+    border:none;
+    border-radius:8px;
+    padding:10px 16px;
+    background:var(--accent3);
+    color:#0e1a22;
+    font-weight:700;
+    cursor:pointer;
+    display:block;
+    margin:14px auto 0;
+  }
+  #stat-strip{
+    display:flex;
+    justify-content:space-around;
+    flex-wrap:wrap;
+    gap:14px;
+    text-align:center;
+  }
+  #stat-strip div{min-width:100px;}
+  #stat-strip .num{
+    font-size:1.7em;
+    font-weight:800;
+    color:var(--accent);
+  }
+  #stat-strip .lab{
+    font-size:0.75em;
+    color:var(--muted);
+    text-transform:uppercase;
+  }
+  #restartBtn{
+    display:block;
+    margin:30px auto 0;
+    background:transparent;
+    border:1px solid var(--muted);
+    color:var(--muted);
+    padding:10px 18px;
+    border-radius:8px;
+    cursor:pointer;
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= GATE ================= -->
+<div id="gate">
+  <div class="floaters">
+    <span style="top:10%;left:10%;">📜</span>
+    <span style="top:20%;right:12%;">🏺</span>
+    <span style="bottom:15%;left:15%;">⚔️</span>
+    <span style="bottom:20%;right:18%;">👑</span>
+  </div>
+  <h1>The Definitely-Accurate History of Your Name</h1>
+  <p class="rule">To enter the archives: capitalize the <b>first letter</b> of your name, and every letter that comes right after a <b>special character</b> (space, underscore, digit, symbol...). Every other letter stays lowercase. Example: <b>James_Bond</b>, <b>Mary Ann</b>, <b>Do99Ris</b>.</p>
+  <div class="name-input-wrap">
+    <input id="nameInput" type="text" placeholder="TYPE YOUR NAME" autocomplete="off" spellcheck="false">
+    <div class="live-preview" id="livePreview"></div>
+    <div id="hint">Waiting for a name worthy of history...</div>
+    <button id="enterBtn" disabled onclick="enterArchive()">Unlock My History</button>
+  </div>
+</div>
+
+<!-- ================= MAIN PAGE ================= -->
+<div id="main">
+  <h1 id="mainTitle">The History of <span id="nameDisplay"></span></h1>
+  <p class="sub">Rigorously unresearched. 0% peer reviewed. 100% about you.</p>
+
+  <div class="section" id="stat-strip-wrap">
+    <h2>Name Stat Sheet</h2>
+    <div id="stat-strip"></div>
+  </div>
+
+  <div class="section">
+    <span class="era-tag">40,000 BCE</span>
+    <h2>Prehistoric Origins</h2>
+    <p id="era1"></p>
+  </div>
+
+  <div class="section">
+    <span class="era-tag">Medieval Period</span>
+    <h2>The Dark(ish) Ages</h2>
+    <p id="era2"></p>
+  </div>
+
+  <div class="section">
+    <span class="era-tag">Industrial Revolution</span>
+    <h2>Mechanization of the Name</h2>
+    <p id="era3"></p>
+  </div>
+
+  <div class="section">
+    <span class="era-tag">Present Day</span>
+    <h2>Modern Legacy</h2>
+    <p id="era4"></p>
+  </div>
+
+  <div class="section">
+    <span class="era-tag">Year 3025</span>
+    <h2>Future Prophecy</h2>
+    <p id="era5"></p>
+  </div>
+
+  <div class="fun-grid">
+    <div class="section">
+      <h2>Your Name, In Emoji</h2>
+      <div class="emoji-name" id="emojiName"></div>
+      <button class="mini" onclick="rerollEmoji()">Reroll Emoji</button>
+    </div>
+
+    <div class="section">
+      <h2>Ancient Anagram Council</h2>
+      <p style="text-align:center;color:var(--muted);margin-bottom:0;">Scrambled forms your name could legally go by:</p>
+      <div class="anagram-list" id="anagramList"></div>
+      <button class="mini" onclick="rerollAnagrams()">Summon New Anagrams</button>
+    </div>
+
+    <div class="section">
+      <h2>Royal Decree Generator</h2>
+      <p id="decreeText" style="text-align:center;"></p>
+      <button class="mini" onclick="rerollDecree()">Issue New Decree</button>
+    </div>
+
+    <div class="section">
+      <h2>Name Fortune Cookie</h2>
+      <p id="fortuneText" style="text-align:center;"></p>
+    </div>
+  </div>
+
+  <button id="restartBtn" onclick="restart()">↩ Start Over With a Different Name</button>
+</div>
+
+<script>
+/* ---------------- GATE LOGIC ---------------- */
+const input = document.getElementById('nameInput');
+const preview = document.getElementById('livePreview');
+const enterBtn = document.getElementById('enterBtn');
+const hint = document.getElementById('hint');
+const wrap = document.querySelector('.name-input-wrap');
+
+const hints = [
+  "So close. The archive gods demand precision.",
+  "Capitalize the first letter, and every letter right after a special character.",
+  "Try again — history is unforgiving.",
+  "You call that a name? Fix those capitals.",
+];
+
+function checkRule(name){
+  // Rule: the first letter, and any letter that comes right after a
+  // non-letter character (space, underscore, digit, symbol, etc.),
+  // must be capital. Every other letter must be lowercase.
+  const letterCount = (name.match(/[a-zA-Z]/g) || []).length;
+  if(letterCount < 1) return false;
+  let expectUpperNext = true; // true at the very start
+  for(const c of name){
+    if(/[a-zA-Z]/.test(c)){
+      const isUpper = c === c.toUpperCase() && c !== c.toLowerCase();
+      if(expectUpperNext && !isUpper) return false;
+      if(!expectUpperNext && isUpper) return false;
+      expectUpperNext = false;
+    } else {
+      expectUpperNext = true; // next letter after a special char must be upper
+    }
+  }
+  return true;
+}
+
+input.addEventListener('input', () => {
+  const val = input.value;
+  // build colored preview
+  let html = '';
+  let expectUpperNext = true;
+  val.split('').forEach((c)=>{
+    let cls = 'neutral';
+    if(/[a-zA-Z]/.test(c)){
+      const isUpper = c === c.toUpperCase() && c !== c.toLowerCase();
+      cls = (expectUpperNext === isUpper) ? 'ok' : 'bad';
+      expectUpperNext = false;
+    } else {
+      expectUpperNext = true;
+    }
+    const display = c === ' ' ? '&nbsp;' : c;
+    html += `<span class="${cls}">${display}</span>`;
+  });
+  preview.innerHTML = html || '&nbsp;';
+
+  const valid = checkRule(val);
+  enterBtn.disabled = !valid;
+  if(val.length === 0){
+    hint.textContent = 'Waiting for a name worthy of history...';
+  } else if(valid){
+    hint.textContent = '✅ The archive recognizes you.';
+  } else {
+    hint.textContent = hints[Math.floor(Math.random()*hints.length)];
+  }
+});
+
+input.addEventListener('keydown', (e) => {
+  if(e.key === 'Enter' && !enterBtn.disabled){
+    enterArchive();
+  }
+});
+
+function shakeBox(){
+  wrap.classList.add('shake');
+  setTimeout(()=>wrap.classList.remove('shake'), 400);
+}
+
+let currentName = '';
+
+function enterArchive(){
+  const val = input.value;
+  if(!checkRule(val)){
+    shakeBox();
+    return;
+  }
+  currentName = val;
+  document.getElementById('gate').style.display = 'none';
+  document.getElementById('main').style.display = 'block';
+  buildEverything(currentName);
+  window.scrollTo(0,0);
+}
+
+function restart(){
+  document.getElementById('main').style.display = 'none';
+  document.getElementById('gate').style.display = 'flex';
+  input.value = '';
+  preview.innerHTML = '';
+  enterBtn.disabled = true;
+  hint.textContent = 'Waiting for a name worthy of history...';
+  input.focus();
+}
+
+/* ---------------- MAIN PAGE CONTENT GENERATION ---------------- */
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+const vowels = 'aeiouAEIOU';
+
+function analyzeName(name){
+  const letters = name.split('');
+  const vowelCount = letters.filter(c => vowels.includes(c)).length;
+  const consonantCount = letters.length - vowelCount;
+  const firstLetter = name[0].toUpperCase();
+  const uniqueLetters = new Set(name.toLowerCase()).size;
+  return {name, length:name.length, vowelCount, consonantCount, firstLetter, uniqueLetters};
+}
+
+function buildEverything(name){
+  const info = analyzeName(name);
+  document.getElementById('nameDisplay').textContent = name;
+
+  // Stat strip
+  const stats = [
+    {num: info.length, lab:'Letters'},
+    {num: info.vowelCount, lab:'Vowels'},
+    {num: info.consonantCount, lab:'Consonants'},
+    {num: info.uniqueLetters, lab:'Unique Letters'},
+    {num: info.length * 7 + info.vowelCount * 13, lab:'Royalty Score'},
+  ];
+  document.getElementById('stat-strip').innerHTML = stats.map(s =>
+    `<div><div class="num">${s.num}</div><div class="lab">${s.lab}</div></div>`
+  ).join('');
+
+  const era1templates = [
+    `Cave paintings dated to 40,000 BCE depict a stick figure grunting something that phonetically resembles "${name}". Archaeologists remain "cautiously stunned."`,
+    `Long before written language, the sound "${name}" was allegedly used by early humans specifically to ask someone to pass the fire.`,
+    `Fossil evidence suggests the first creature to attempt pronouncing "${name}" was a mammoth, and it did not go well for the mammoth.`,
+  ];
+  const era2templates = [
+    `In the year 812, a minor noble named ${name} was recorded losing a jousting match to a hay bale. The hay bale was later knighted.`,
+    `Court records from a medieval village mention a ${name} who was fined two chickens for "excessive confidence."`,
+    `A traveling bard once wrote a 40-verse ballad about someone named ${name} tripping over a castle drawbridge. It became surprisingly popular.`,
+  ];
+  const era3templates = [
+    `During the Industrial Revolution, factories briefly attempted to name a steam engine "${name}" before realizing it kept quietly breaking down for dramatic effect.`,
+    `A 19th-century inventor tried to patent a device named after ${name}. It was rejected for "doing absolutely nothing useful, impressively."`,
+    `Newspaper archives show a ${name} won a local pie-eating contest and never let anyone forget it, in writing, for years.`,
+  ];
+  const era4templates = [
+    `Today, ${info.uniqueLetters} people out of every made-up statistic share your exact vibe of naming energy.`,
+    `Modern scientists estimate that people named ${name} are ${info.length * 11}% more likely to say "wait, what?" in meetings.`,
+    `${name} currently ranks #1 on a leaderboard that does not exist, for a category that has not been invented yet.`,
+  ];
+  const era5templates = [
+    `By the year 3025, historians will teach an entire semester on "${name}: The Legend, The Myth, The Slightly Confusing Legal Documents."`,
+    `Future civilizations will name a small, mildly inconvenient asteroid after ${name}, purely out of respect.`,
+    `In 3025, saying the name "${name}" three times into a mirror is rumored to summon a mildly judgmental hologram.`,
+  ];
+
+  document.getElementById('era1').textContent = pick(era1templates);
+  document.getElementById('era2').textContent = pick(era2templates);
+  document.getElementById('era3').textContent = pick(era3templates);
+  document.getElementById('era4').textContent = pick(era4templates);
+  document.getElementById('era5').textContent = pick(era5templates);
+
+  rerollEmoji();
+  rerollAnagrams();
+  rerollDecree();
+  rerollFortune();
+}
+
+const emojiPool = ['🔥','✨','🌪️','🐉','🦄','👑','🎩','🍕','🧀','🚀','🌈','🎪','🦖','🍄','⚡','🎭','🥨','🐢','🛸','🎺'];
+function rerollEmoji(){
+  const name = currentName;
+  const emojis = name.split('').map(()=> pick(emojiPool)).join(' ');
+  document.getElementById('emojiName').textContent = emojis;
+}
+
+function shuffle(arr){
+  const a = [...arr];
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+function rerollAnagrams(){
+  const name = currentName;
+  const list = document.getElementById('anagramList');
+  list.innerHTML = '';
+  const used = new Set();
+  let attempts = 0;
+  while(used.size < 4 && attempts < 30){
+    attempts++;
+    const shuffled = shuffle(name.split('')).join('');
+    if(shuffled.toLowerCase() !== name.toLowerCase()){
+      used.add(shuffled);
+    }
+  }
+  [...used].forEach(a=>{
+    const span = document.createElement('span');
+    span.textContent = a;
+    list.appendChild(span);
+  });
+}
+
+const decreeTemplates = [
+  (n)=>`By royal decree, all citizens shall henceforth greet ${n} with a slight, respectful bow and mild confusion.`,
+  (n)=>`Let it be known: ${n} is hereby exempt from waiting in lines shorter than four people.`,
+  (n)=>`The crown proclaims that any pizza shared with ${n} must legally include extra cheese.`,
+  (n)=>`It is decreed that ${n} shall be consulted before any major decision involving snacks.`,
+];
+function rerollDecree(){
+  document.getElementById('decreeText').textContent = pick(decreeTemplates)(currentName);
+}
+
+const fortuneTemplates = [
+  (n)=>`A name like ${n} was destined for snacks and minor greatness.`,
+  (n)=>`${n}, your future holds one (1) unexpected compliment and several confusing dreams.`,
+  (n)=>`Legend says ${n} will find a really good parking spot this week.`,
+  (n)=>`The stars are unclear on ${n}'s future, but they seem enthusiastic about it.`,
+  (n)=>`${n} will soon discover a snack hiding in a place they already checked twice.`,
+  (n)=>`Somewhere, a vending machine is about to give ${n} exactly what they wanted, first try.`,
+  (n)=>`${n} is currently one decision away from a surprisingly good Tuesday.`,
+  (n)=>`Fortune whispers: ${n} will win an argument they weren't even trying to win.`,
+  (n)=>`A great WiFi signal awaits ${n} in an unexpected room of the house.`,
+  (n)=>`${n}, beware of stairs today. They know what they did.`,
+  (n)=>`The universe has scheduled a small, unearned victory for ${n} this week.`,
+  (n)=>`${n} will find money in an old jacket pocket. Emotional damage: minimal.`,
+  (n)=>`Someone will text ${n} "we should hang out soon" and actually mean it this time.`,
+  (n)=>`${n} is destined to correctly guess the ending of a movie out loud, annoyingly.`,
+  (n)=>`A nap taken by ${n} today will be scientifically superior to all other naps.`,
+  (n)=>`${n} will open the fridge for no reason and somehow find exactly what's needed.`,
+  (n)=>`The cosmos predicts ${n} will finally remember where they left that one thing.`,
+  (n)=>`${n}'s next haircut/hair day will exceed all reasonable expectations.`,
+  (n)=>`A stranger will laugh at ${n}'s joke. A real laugh. Not the polite one.`,
+  (n)=>`${n} will beat a red light streak so long it should be studied by scientists.`,
+];
+function rerollFortune(){
+  document.getElementById('fortuneText').textContent = pick(fortuneTemplates)(currentName);
+}
+</script>
+
+</body>
+</html>
